@@ -94,10 +94,10 @@ public class GridTool : EditorWindow
 
     private void DuringSceneGUI(SceneView view)
     {
-        DrawGrid(gridSize);
+        DrawGrid();
     }
 
-    private void DrawGrid(int size)
+    private void DrawGrid()
     {
         if (Event.current.type == EventType.Repaint)
         {
@@ -106,10 +106,9 @@ public class GridTool : EditorWindow
 
             if (current != null) camPos = current.camera.transform.position;
 
-            float drawDistance = gridStep * size;
+            float drawDistance = gridStep * gridSize;
 
             Vector3 startPos = camPos;
-            Vector3 offset;
             Vector3 fromAxis;
             Vector3 alongAxis;
 
@@ -118,30 +117,34 @@ public class GridTool : EditorWindow
                 case GridPlane.XY:
                     fromAxis = Vector3.right;
                     alongAxis = Vector3.up;
-                    offset = (Vector3.right + Vector3.up) * (size * gridStep) / 2f;
                     startPos.z = camPos.z * (followCamera ? 1 : 0) + gridOffset;
                     break;
                 case GridPlane.XZ:
                     fromAxis = Vector3.right;
                     alongAxis = Vector3.forward;
-                    offset = (Vector3.right + Vector3.forward) * (size * gridStep) / 2f;
                     startPos.y = camPos.y * (followCamera ? 1 : 0) + gridOffset;
                     break;
                 case GridPlane.YZ:
                     fromAxis = Vector3.up;
                     alongAxis = Vector3.forward;
-                    offset = (Vector3.up + Vector3.forward) * (size * gridStep) / 2f;
                     startPos.x = camPos.x * (followCamera ? 1 : 0) + gridOffset;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
+            Vector3 offset = GetGridDrawOffset(fromAxis, alongAxis);
             startPos -= offset;
 
             DrawLines(fromAxis, alongAxis, startPos, gridSize + 1, drawDistance);
             DrawLines(alongAxis, fromAxis, startPos, gridSize + 1, drawDistance);
         }
+    }
+
+    private Vector3 GetGridDrawOffset(Vector3 firstAxis, Vector3 secondAxis)
+    {
+        Vector3 offset = (firstAxis + secondAxis) * (gridSize * gridStep) / 2f;
+        return offset;
     }
 
     private bool AreAnySelectedInSceneView()
