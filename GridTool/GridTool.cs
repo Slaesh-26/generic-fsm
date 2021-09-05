@@ -99,46 +99,45 @@ public class GridTool : EditorWindow
 
     private void DrawGrid()
     {
-        if (Event.current.type == EventType.Repaint)
+        if (Event.current.type != EventType.Repaint) return;
+        
+        SceneView current = SceneView.currentDrawingSceneView;
+        Vector3 camPos = Vector3.zero;
+
+        if (current != null) camPos = current.camera.transform.position;
+
+        float drawDistance = gridStep * gridSize;
+
+        Vector3 startPos = camPos;
+        Vector3 fromAxis;
+        Vector3 alongAxis;
+
+        switch (gridPlane)
         {
-            SceneView current = SceneView.currentDrawingSceneView;
-            Vector3 camPos = Vector3.zero;
-
-            if (current != null) camPos = current.camera.transform.position;
-
-            float drawDistance = gridStep * gridSize;
-
-            Vector3 startPos = camPos;
-            Vector3 fromAxis;
-            Vector3 alongAxis;
-
-            switch (gridPlane)
-            {
-                case GridPlane.XY:
-                    fromAxis = Vector3.right;
-                    alongAxis = Vector3.up;
-                    startPos.z = camPos.z * (followCamera ? 1 : 0) + gridOffset;
-                    break;
-                case GridPlane.XZ:
-                    fromAxis = Vector3.right;
-                    alongAxis = Vector3.forward;
-                    startPos.y = camPos.y * (followCamera ? 1 : 0) + gridOffset;
-                    break;
-                case GridPlane.YZ:
-                    fromAxis = Vector3.up;
-                    alongAxis = Vector3.forward;
-                    startPos.x = camPos.x * (followCamera ? 1 : 0) + gridOffset;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            Vector3 offset = GetGridDrawOffset(fromAxis, alongAxis);
-            startPos -= offset;
-
-            DrawLines(fromAxis, alongAxis, startPos, gridSize + 1, drawDistance);
-            DrawLines(alongAxis, fromAxis, startPos, gridSize + 1, drawDistance);
+            case GridPlane.XY:
+                fromAxis = Vector3.right;
+                alongAxis = Vector3.up;
+                startPos.z = camPos.z * (followCamera ? 1 : 0) + gridOffset;
+                break;
+            case GridPlane.XZ:
+                fromAxis = Vector3.right;
+                alongAxis = Vector3.forward;
+                startPos.y = camPos.y * (followCamera ? 1 : 0) + gridOffset;
+                break;
+            case GridPlane.YZ:
+                fromAxis = Vector3.up;
+                alongAxis = Vector3.forward;
+                startPos.x = camPos.x * (followCamera ? 1 : 0) + gridOffset;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
+
+        Vector3 offset = GetGridDrawOffset(fromAxis, alongAxis);
+        startPos -= offset;
+
+        DrawLines(fromAxis, alongAxis, startPos, gridSize + 1, drawDistance);
+        DrawLines(alongAxis, fromAxis, startPos, gridSize + 1, drawDistance);
     }
 
     private Vector3 GetGridDrawOffset(Vector3 firstAxis, Vector3 secondAxis)
